@@ -511,6 +511,8 @@ namespace sdp
         const colorimetry UNSPECIFIED{ U("UNSPECIFIED") };
         // ISO 11664-1 CIE 1931 standard colorimetric system
         const colorimetry XYZ{ U("XYZ") };
+        // Colorimetry value signaled for key signals as specified in SMPTE RP 157
+        const colorimetry ALPHA{ U("ALPHA") };
     }
 
     // Packing Mode
@@ -530,6 +532,9 @@ namespace sdp
     namespace smpte_standard_numbers
     {
         const smpte_standard_number ST2110_20_2017{ U("ST2110-20:2017") };
+        // "Senders implementing this standard shall signal the value ST2110-20:2017 unless the colorimetry value ALPHA
+        // or the TCS value ST2115LOGS3 are used, in which case the value ST2110-20:2020 shall be signaled."
+        const smpte_standard_number ST2110_20_2020{ U("ST2110-20:2020") };
     }
 
     // TP (Media Type Parameter)
@@ -573,6 +578,8 @@ namespace sdp
         // Hmm, the JPEG XS payload mapping includes "video streams whose transfer characteristics are signaled by the payload as specified in ISO/IEC 21122-3".
         // See https://tools.ietf.org/html/draft-ietf-payload-rtp-jpegxs-09#section-6
         const transfer_characteristic_system UNSPECIFIED{ U("UNSPECIFIED") };
+        // Video streams of high dynamic range video that utilize the "Camera Log S3" (i.e. S-Log3) transfer characteristic specified in SMPTE ST 2115.
+        const transfer_characteristic_system ST2115LOGS3{ U("ST2115LOGS3") };
     }
 
     // RANGE
