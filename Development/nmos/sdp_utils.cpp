@@ -499,7 +499,10 @@ namespace nmos
         web::json::push_back(format_specific_parameters, sdp::named_value(sdp::fields::colorimetry, sdp_params.video.colorimetry.name));
         if (!sdp_params.video.tcs.name.empty()) web::json::push_back(format_specific_parameters, sdp::named_value(sdp::fields::transfer_characteristic_system, sdp_params.video.tcs.name));
         web::json::push_back(format_specific_parameters, sdp::named_value(sdp::fields::packing_mode, sdp::packing_modes::general.name)); // or block...
-        web::json::push_back(format_specific_parameters, sdp::named_value(sdp::fields::smpte_standard_number, sdp::smpte_standard_numbers::ST2110_20_2017.name));
+        const auto ssn = sdp::colorimetries::ALPHA == sdp_params.video.colorimetry || sdp::transfer_characteristic_systems::ST2115LOGS3 == sdp_params.video.tcs
+            ? sdp::smpte_standard_numbers::ST2110_20_2020
+            : sdp::smpte_standard_numbers::ST2110_20_2017;
+        web::json::push_back(format_specific_parameters, sdp::named_value(sdp::fields::smpte_standard_number, ssn.name));
         if (!sdp_params.video.tp.name.empty()) web::json::push_back(format_specific_parameters, sdp::named_value(sdp::fields::type_parameter, sdp_params.video.tp.name));
 
         const auto fmtp = web::json::value_of({
