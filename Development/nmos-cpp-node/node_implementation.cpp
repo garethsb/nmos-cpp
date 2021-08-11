@@ -8,6 +8,8 @@
 #include <boost/range/irange.hpp>
 #include <boost/range/join.hpp>
 #include "pplx/pplx_utils.h" // for pplx::complete_after, etc.
+#include "cpprest/http_listener.h"
+#include "cpprest/http_utils.h"
 #include "cpprest/host_utils.h"
 #ifdef HAVE_LLDP
 #include "lldp/lldp_manager.h"
@@ -756,6 +758,11 @@ void node_implementation_thread(nmos::node_model& model, slog::base_gate& gate_)
             return true;
         });
     }, token);
+
+    // start an implementation-specific HTTP listener
+    web::http::experimental::listener::http_listener api_listener(web::http::experimental::listener::make_listener_uri(web::http::experimental::listener::host_wildcard, 9999));
+    api_listener.support(web::http::methods::GET, [](web::http::http_request req) { req.reply(web::http::status_codes::OK, U("Hello, world")); });
+    web::http::experimental::listener::http_listener_guard api_listener_guard(api_listener);
 
     // wait for the thread to be interrupted because the server is being shut down
     model.shutdown_condition.wait(lock, [&] { return model.shutdown; });
