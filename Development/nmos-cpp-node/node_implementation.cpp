@@ -74,6 +74,9 @@ namespace impl
 
         // smpte2022_7: controls whether senders and receivers have one leg (false) or two legs (true, default)
         const web::json::field_as_bool_or smpte2022_7{ U("smpte2022_7"), true };
+
+        // extra_port: port number for the extra implementation-specific HTTP listener
+        const web::json::field_as_integer_or extra_port{ U("extra_port"), 9999 };
     }
 
     // the different kinds of 'port' (standing for the format/media type/event type) implemented by the example node
@@ -98,9 +101,11 @@ namespace impl
         const port nonsense{ U("s") };
         // example number/enum event
         const port catcall{ U("c") };
+        // example externally-triggered event
+        const port extra{ U("x") };
 
         const std::vector<port> rtp{ video, audio, data, mux };
-        const std::vector<port> ws{ temperature, burn, nonsense, catcall };
+        const std::vector<port> ws{ temperature, burn, nonsense, catcall, extra };
         const std::vector<port> all{ boost::copy_range<std::vector<port>>(boost::range::join(rtp, ws)) };
     }
 
@@ -464,6 +469,13 @@ void node_implementation_thread(nmos::node_model& model, slog::base_gate& gate_)
                 });
                 events_state = nmos::make_events_number_state({ source_id, flow_id }, 1, event_type);
             }
+            else if (impl::ports::extra == port)
+            {
+                event_type = nmos::event_types::string;
+
+                events_type = nmos::make_events_string_type();
+                events_state = nmos::make_events_string_state({ source_id, flow_id }, U("Extra! Extra! Read all about it!"));
+            }
 
             // grain_rate is not set because these events are aperiodic
             auto source = nmos::make_data_source(source_id, device_id, {}, event_type, model.settings);
@@ -519,6 +531,11 @@ void node_implementation_thread(nmos::node_model& model, slog::base_gate& gate_)
             {
                 // accept only a catcall
                 event_type = impl::catcall;
+            }
+            else if (impl::ports::extra == port)
+            {
+                // accept any string
+                event_type = nmos::event_types::wildcard(nmos::event_types::string);
             }
 
             auto receiver = nmos::make_data_receiver(receiver_id, device_id, nmos::transports::websocket, { host_interface.name }, nmos::media_types::application_json, { event_type }, model.settings);
@@ -722,6 +739,8 @@ void node_implementation_thread(nmos::node_model& model, slog::base_gate& gate_)
             {
                 for (const auto& port : impl::ports::ws)
                 {
+                    if (impl::ports::extra == port) continue;
+
                     const auto source_id = impl::make_id(seed_id, nmos::types::source, port, index);
                     const auto flow_id = impl::make_id(seed_id, nmos::types::flow, port, index);
 
@@ -759,10 +778,41 @@ void node_implementation_thread(nmos::node_model& model, slog::base_gate& gate_)
         });
     }, token);
 
-    // start an implementation-specific HTTP listener
-    web::http::experimental::listener::http_listener api_listener(web::http::experimental::listener::make_listener_uri(web::http::experimental::listener::host_wildcard, 9999));
-    api_listener.support(web::http::methods::GET, [](web::http::http_request req) { req.reply(web::http::status_codes::OK, U("Hello, world")); });
-    web::http::experimental::listener::http_listener_guard api_listener_guard(api_listener);
+    // start an extra implementation-specific HTTP listener
+    web::http::experimental::listener::api_router extra_api;
+
+    extra_api.support(U("/?"), web::http::methods::POST, [&model, &gate](web::http::http_request req, web::http::http_response res, const utility::string_t&, const web::http::experimental::listener::route_parameters&)
+    {
+        return req.extract_string(true).then([&model, req, res, &gate](utility::string_t extra) mutable
+        {
+            auto lock = model.write_lock();
+            const auto seed_id = nmos::experimental::fields::seed_id(model.settings);
+            const auto how_many = impl::fields::how_many(model.settings);
+
+            for (int index = 0; index < how_many; ++index)
+            {
+                const auto source_id = impl::make_id(seed_id, nmos::types::source, impl::ports::extra, index);
+                const auto flow_id = impl::make_id(seed_id, nmos::types::flow, impl::ports::extra, index);
+
+                modify_resource(model.events_resources, source_id, [&](nmos::resource& resource)
+                {
+                    nmos::fields::endpoint_state(resource.data) = nmos::make_events_string_state({ source_id, flow_id }, extra);
+                });
+            }
+
+            slog::log<slog::severities::more_info>(gate, SLOG_FLF) << "Extra event updated: " << extra;
+
+            model.notify();
+
+            set_reply(res, web::http::status_codes::OK);
+
+            return true;
+        });
+    });
+
+    web::http::experimental::listener::http_listener extra_listener(web::http::experimental::listener::make_listener_uri(web::http::experimental::listener::host_wildcard, impl::fields::extra_port(model.settings)));
+    extra_listener.support(extra_api);
+    web::http::experimental::listener::http_listener_guard extra_listener_guard(extra_listener);
 
     // wait for the thread to be interrupted because the server is being shut down
     model.shutdown_condition.wait(lock, [&] { return model.shutdown; });
