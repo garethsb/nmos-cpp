@@ -711,6 +711,8 @@ namespace nmos
         return{ session_name, sdp::media_types::video, rtpmap, fmtp, {}, {}, {}, {}, media_stream_ids, ts_refclk };
     }
 
+
+
     // Construct SDP parameters for "audio/L", with sensible defaults for unspecified fields
     sdp_parameters make_audio_L_sdp_parameters(const utility::string_t& session_name, const audio_L_parameters& params, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids, const std::vector<sdp_parameters::ts_refclk_t>& ts_refclk)
     {
@@ -740,6 +742,24 @@ namespace nmos
             return sdp_parameters::fmtp_t::value_type{ sdp::fields::DID_SDID, make_fmtp_did_sdid(did_sdid) };
         }));
         if (0 != params.vpid_code) fmtp.push_back({ sdp::fields::VPID_Code, utility::ostringstreamed(params.vpid_code) });
+
+        return{ session_name, sdp::media_types::video, rtpmap, fmtp, {}, {}, {}, {}, media_stream_ids, ts_refclk };
+    }
+
+    // Construct SDP parameters for "video/H264", with sensible defaults for unspecified fields
+    sdp_parameters make_video_H264_sdp_parameters(const utility::string_t& session_name, const video_h264_parameters& params, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids, const std::vector<sdp_parameters::ts_refclk_t>& ts_refclk)
+    {
+        // a=rtpmap:<payload type> <encoding name>/<clock rate>[/<encoding parameters>]
+        sdp_parameters::rtpmap_t rtpmap = { payload_type, U("H264"), 90000 };
+
+        // a=fmtp:<format> <format specific parameters>
+        // for simplicity, following the order of parameters given in VSF TR-05:2017
+        // See https://tools.ietf.org/html/rfc4566#section-6
+        sdp_parameters::fmtp_t fmtp = {
+                { sdp::fields::profile_level_id, utility::ostringstreamed(params.profile_level_id) },
+                { sdp::fields::packetization_mode, utility::ostringstreamed(params.packetization_mode) },
+                { sdp::fields::sprop_parameter_sets, utility::ostringstreamed(params.sprop_parameter_sets)}
+        };
 
         return{ session_name, sdp::media_types::video, rtpmap, fmtp, {}, {}, {}, {}, media_stream_ids, ts_refclk };
     }

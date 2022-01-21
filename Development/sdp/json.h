@@ -456,6 +456,12 @@ namespace sdp
         const web::json::field_as_string profile{ U("profile") }; // e.g. 'Main-444.12' or 'High-444.12'
         const web::json::field_as_string level{ U("level") }; // e.g. '2k-1' or '4k-1'
         const web::json::field_as_string sublevel{ U("sublevel") }; // e.g. 'Sublev3bpp' or 'Sublev6pp'
+
+        //H264 payload mapping
+        const web::json::field<uint32_t> profile_level_id{U("profile-level-id")};
+        const web::json::field<uint32_t> packetization_mode{U("packetization-mode")};
+        const web::json::field_as_string sprop_parameter_sets{U("sprop-parameter-sets")};
+
     }
 }
 

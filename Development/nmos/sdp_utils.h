@@ -310,6 +310,24 @@ namespace nmos
         {}
     };
 
+    // Additional "video/H264" parameters
+    // See https://www.iana.org/assignments/media-types/video/H264
+    //All the parameters are optional but this are the recommended to be used.
+    struct video_h264_parameters
+    {
+        // fmtp indicates format
+        uint32_t profile_level_id;
+        uint32_t packetization_mode;
+        std::string sprop_parameter_sets;
+
+        video_h264_parameters() : profile_level_id(), packetization_mode(), sprop_parameter_sets(){}
+        video_h264_parameters(uint32_t profile_level_id, uint32_t packetization_mode, std::string sprop_parameter_sets)
+                : profile_level_id(profile_level_id)
+                , packetization_mode(packetization_mode)
+                , sprop_parameter_sets(sprop_parameter_sets)
+        {}
+    };
+
     // Additional "audio/L" parameters
     // See SMPTE ST 2110-30:2017
     // and https://www.iana.org/assignments/media-types/audio/L24
