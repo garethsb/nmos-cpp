@@ -504,6 +504,20 @@ namespace sdp
         const sampling UNSPECIFIED{ U("UNSPECIFIED") };
     }
 
+    //Packetization Mode
+    //See https://www.iana.org/assignments/media-types/video/H264
+    DEFINE_STRING_ENUM(packetization_mode)
+    namespace packetization_modes
+    {
+        // Single Nal
+        const packetization_mode SINGLE_NAL{ U("0") };
+        // Non Interleaved
+        const packetization_mode NON_INTERLEAVED{ U("1") };
+        // Interleaved
+        const packetization_mode INTERLEAVED{ U("2") };
+    }
+
+
     // Colorimetry
     // See https://tools.ietf.org/html/rfc4175
     // and SMPTE ST 2110-20:2017 Section 7.5 Permitted values of Colorimetry
