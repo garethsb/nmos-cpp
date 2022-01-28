@@ -224,6 +224,20 @@ namespace nmos
         return params;
     }
 
+    // Construct additional "video/h264" parameters from the IS-04 resources, using default values for unspecified items
+    video_h264_parameters make_video_264_parameters(const web::json::value& node, const web::json::value& source, const web::json::value& flow, const web::json::value& sender, bst::optional<sdp::type_parameter> tp)
+    {
+        video_h264_parameters params;
+
+        // maps directly
+        params.profile_level_id = nmos::fields::profile_level_id(flow);
+
+        // also maps directly
+        params.packetization_mode = sdp::packetization_mode{ nmos::fields::packetization_mode(sender) };
+
+        return params;
+    }
+
     sdp_parameters make_video_sdp_parameters(const web::json::value& node, const web::json::value& source, const web::json::value& flow, const web::json::value& sender, bst::optional<uint64_t> payload_type, const std::vector<utility::string_t>& media_stream_ids, bst::optional<int> ptp_domain, bst::optional<sdp::type_parameter> tp)
     {
         auto params = make_video_raw_parameters(node, source, flow, sender, tp);
