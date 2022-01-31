@@ -1378,6 +1378,46 @@ namespace nmos
         return params;
     }
 
+    // Get additional "video/h265" parameters from the SDP parameters
+    video_h265_parameters get_video_h265_parameters(const sdp_parameters& sdp_params)
+    {
+        video_h265_parameters params;
+
+        if (sdp_params.fmtp.empty()) throw details::sdp_processing_error("missing attribute: fmtp");
+
+        // optional
+        const auto profile_id = find_fmtp(sdp_params.fmtp, sdp::fields::profile_id);
+        if(sdp_params.fmtp.end() != profile_id ) throw details::sdp_processing_error("missing format parameter: profile-id");
+        params.profile_id = utility::istringstreamed<uint32_t>( profile_id->second );
+
+        // optional
+        const auto level_id = find_fmtp(sdp_params.fmtp, sdp::fields::level_id);
+        if (sdp_params.fmtp.end() == level_id) throw details::sdp_processing_error("missing format parameter: level_id");
+        params.level_id = utility::istringstreamed<uint32_t>( level_id->second );
+
+        //optional
+        const auto interop_constraints = find_fmtp(sdp_params.fmtp, sdp::fields::interop_constraints);
+        if (sdp_params.fmtp.end() == interop_constraints) throw details::sdp_processing_error("missing format parameter: interop_constraints");
+        params.interop_constraints = utility::istringstreamed<uint32_t>( interop_constraints->second );
+
+        //optional
+        const auto sprop_vps = find_fmtp(sdp_params.fmtp, sdp::fields::sprop_vps);
+        if (sdp_params.fmtp.end() == sprop_vps) throw details::sdp_processing_error("missing format parameter: sprop_vps");
+        params.sprop_vps = sprop_vps->second;
+
+        //optional
+        const auto sprop_sps = find_fmtp(sdp_params.fmtp, sdp::fields::sprop_sps);
+        if (sdp_params.fmtp.end() == sprop_sps) throw details::sdp_processing_error("missing format parameter: sprop_sps");
+        params.sprop_sps = sprop_sps->second;
+
+        //optional
+        const auto sprop_pps = find_fmtp(sdp_params.fmtp, sdp::fields::sprop_pps);
+        if (sdp_params.fmtp.end() == sprop_pps) throw details::sdp_processing_error("missing format parameter: sprop_pps");
+        params.sprop_pps = sprop_pps->second;
+
+        return params;
+    }
+
     // Get additional "audio/L" parameters from the SDP parameters
     audio_L_parameters get_audio_L_parameters(const sdp_parameters& sdp_params)
     {
