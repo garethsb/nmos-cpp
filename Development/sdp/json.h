@@ -456,6 +456,12 @@ namespace sdp
         const web::json::field_as_string profile{ U("profile") }; // e.g. 'Main-444.12' or 'High-444.12'
         const web::json::field_as_string level{ U("level") }; // e.g. '2k-1' or '4k-1'
         const web::json::field_as_string sublevel{ U("sublevel") }; // e.g. 'Sublev3bpp' or 'Sublev6pp'
+
+        //H264 payload mapping
+        const web::json::field<uint32_t> profile_level_id{U("profile-level-id")};
+        const web::json::field<uint32_t> packetization_mode{U("packetization-mode")};
+        const web::json::field_as_string sprop_parameter_sets{U("sprop-parameter-sets")};
+
     }
 }
 
@@ -497,6 +503,20 @@ namespace sdp
         // See https://tools.ietf.org/html/draft-ietf-payload-rtp-jpegxs-09#section-6
         const sampling UNSPECIFIED{ U("UNSPECIFIED") };
     }
+
+    //Packetization Mode
+    //See https://www.iana.org/assignments/media-types/video/H264
+    DEFINE_STRING_ENUM(packetization_mode)
+    namespace packetization_modes
+    {
+        // Single Nal
+        const packetization_mode SINGLE_NAL{ U("0") };
+        // Non Interleaved
+        const packetization_mode NON_INTERLEAVED{ U("1") };
+        // Interleaved
+        const packetization_mode INTERLEAVED{ U("2") };
+    }
+
 
     // Colorimetry
     // See https://tools.ietf.org/html/rfc4175

@@ -19,6 +19,7 @@
 #include "nmos/json_fields.h"
 #include "nmos/media_type.h"
 #include "nmos/transport.h"
+#include <sstream>
 
 namespace nmos
 {
@@ -219,6 +220,20 @@ namespace nmos
         // grain_rate is optional in the flow, but if it's not there, for a video flow, it must be in the source
         const auto& grain_rate = nmos::fields::grain_rate(flow.has_field(nmos::fields::grain_rate) ? flow : source);
         params.exactframerate = nmos::rational(nmos::fields::numerator(grain_rate), nmos::fields::denominator(grain_rate));
+
+        return params;
+    }
+
+    // Construct additional "video/h264" parameters from the IS-04 resources, using default values for unspecified items
+    video_h264_parameters make_video_264_parameters(const web::json::value& node, const web::json::value& source, const web::json::value& flow, const web::json::value& sender, bst::optional<sdp::type_parameter> tp)
+    {
+        video_h264_parameters params;
+
+        // maps directly
+        params.profile_level_id = nmos::fields::profile_level_id(flow);
+
+        // also maps directly
+        params.packetization_mode = sdp::packetization_mode{ nmos::fields::packetization_mode(sender) };
 
         return params;
     }
@@ -711,6 +726,8 @@ namespace nmos
         return{ session_name, sdp::media_types::video, rtpmap, fmtp, {}, {}, {}, {}, media_stream_ids, ts_refclk };
     }
 
+
+
     // Construct SDP parameters for "audio/L", with sensible defaults for unspecified fields
     sdp_parameters make_audio_L_sdp_parameters(const utility::string_t& session_name, const audio_L_parameters& params, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids, const std::vector<sdp_parameters::ts_refclk_t>& ts_refclk)
     {
@@ -740,6 +757,40 @@ namespace nmos
             return sdp_parameters::fmtp_t::value_type{ sdp::fields::DID_SDID, make_fmtp_did_sdid(did_sdid) };
         }));
         if (0 != params.vpid_code) fmtp.push_back({ sdp::fields::VPID_Code, utility::ostringstreamed(params.vpid_code) });
+
+        return{ session_name, sdp::media_types::video, rtpmap, fmtp, {}, {}, {}, {}, media_stream_ids, ts_refclk };
+    }
+
+    std::string from_24bit_to_hex(uint32_t x)
+    {
+        assert(x < 0x1000000);
+        std::ostringstream ss;
+        ss << std::hex << std::setw(6) << std::setfill('0') << x;
+        return ss.str();
+    }
+
+    long from_hex_to_int(const std::string x)
+    {
+        long converted = std::stol(x, nullptr, 16);
+        return converted;
+    }
+
+    // Construct SDP parameters for "video/H264", with sensible defaults for unspecified fields
+    sdp_parameters make_video_H264_sdp_parameters(const utility::string_t& session_name, const video_h264_parameters& params, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids, const std::vector<sdp_parameters::ts_refclk_t>& ts_refclk)
+    {
+        // a=rtpmap:<payload type> <encoding name>/<clock rate>[/<encoding parameters>]
+        sdp_parameters::rtpmap_t rtpmap = { payload_type, U("H264"), 90000 };
+
+
+
+        // a=fmtp:<format> <format specific parameters>
+        // for simplicity, following the order of parameters given in VSF TR-05:2017
+        // See https://tools.ietf.org/html/rfc4566#section-6
+        sdp_parameters::fmtp_t fmtp = {
+                { sdp::fields::profile_level_id, from_24bit_to_hex(params.profile_level_id) },
+                { sdp::fields::packetization_mode, params.packetization_mode.name },
+                { sdp::fields::sprop_parameter_sets, params.sprop_parameter_sets}
+        };
 
         return{ session_name, sdp::media_types::video, rtpmap, fmtp, {}, {}, {}, {}, media_stream_ids, ts_refclk };
     }
@@ -1273,6 +1324,33 @@ namespace nmos
         // else params.tp = {};
 
         // don't examine optional parameters "TROFF", "CMAX"
+
+        return params;
+    }
+
+    // Get additional "video/h264" parameters from the SDP parameters
+    video_h264_parameters get_video_h264_parameters(const sdp_parameters& sdp_params)
+    {
+        video_h264_parameters params;
+
+        if (sdp_params.fmtp.empty()) throw details::sdp_processing_error("missing attribute: fmtp");
+
+        // optional
+        const auto profile_level_id_hex = find_fmtp(sdp_params.fmtp, sdp::fields::profile_level_id);
+        if(profile_level_id_hex != sdp_params.fmtp.end() ){
+            params.profile_level_id = from_hex_to_int(profile_level_id_hex->second);
+        }
+
+        // optional
+        const auto packetization_mode = find_fmtp(sdp_params.fmtp, sdp::fields::packetization_mode);
+        if (sdp_params.fmtp.end() == packetization_mode) throw details::sdp_processing_error("missing format parameter: packetization mode");
+        params.packetization_mode = sdp::packetization_mode{ packetization_mode->second };
+
+        //optional
+        const auto sprop_parameter_sets = find_fmtp(sdp_params.fmtp, sdp::fields::sprop_parameter_sets);
+        if (sdp_params.fmtp.end() == sprop_parameter_sets) throw details::sdp_processing_error("missing format parameter: sprop-parameters-sets");
+        params.sprop_parameter_sets = sprop_parameter_sets->second;
+
 
         return params;
     }

@@ -76,6 +76,8 @@ namespace nmos
         const web::json::field_as_integer frame_width{ U("frame_width") };
         const web::json::field_as_integer frame_height{ U("frame_height") };
         const web::json::field_as_string colorspace{ U("colorspace") };
+        //flow_video_h264
+        const web::json::field_as_integer profile_level_id{ U("profile_level_id") };
         // flow_video_raw
         const web::json::field_as_array components{ U("components") };
         const web::json::field_as_string_or transfer_characteristic{ U("transfer_characteristic"), U("") }; // or "SDR"?
@@ -91,6 +93,7 @@ namespace nmos
         const web::json::field_as_string_or SDID{ U("SDID"), U("0x00") };
         // sender
         const web::json::field_as_array interface_bindings{ U("interface_bindings") }; // also used in receiver
+        const web::json::field_as_string packetization_mode{ U("packetization_mode") }; // for h264 video
         const web::json::field_as_string transport{ U("transport") }; // also used in receiver
         const web::json::field_as_value flow_id{ U("flow_id") };
         const web::json::field_as_value_or manifest_href{ U("manifest_href"), {} }; // string, or null from v1.3
