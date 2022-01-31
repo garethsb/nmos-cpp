@@ -360,6 +360,26 @@ namespace nmos
               sprop_parameter_sets(sprop_parameter_sets) {}
     };
 
+    // Additional "video/H265" parameters
+    // See https://datatracker.ietf.org/doc/html/draft-ietf-payload-rtp-h265-15
+    struct video_h265_parameters
+    {
+        // fmtp indicates format
+        uint32_t profile_id;
+        uint32_t level_id;
+        uint32_t interop_constraints;
+        utility::string_t sprop_vps;
+        utility::string_t sprop_sps;
+        utility::string_t sprop_pps;
+
+        video_h265_parameters() : profile_id(), level_id(), interop_constraints(), sprop_vps(), sprop_sps(), sprop_pps() {}
+
+        video_h265_parameters(uint32_t profile_id, uint32_t level_id, uint32_t interop_constraints, utility::string_t sprop_vps,
+                              utility::string_t sprop_sps, utility::string_t sprop_pps)
+                : profile_id(profile_id), level_id(level_id), interop_constraints(interop_constraints), sprop_vps(sprop_vps),
+                  sprop_sps(sprop_sps), sprop_pps(sprop_pps) {}
+    };
+
     // Additional "audio/L" parameters
     // See SMPTE ST 2110-30:2017
     // and https://www.iana.org/assignments/media-types/audio/L24
