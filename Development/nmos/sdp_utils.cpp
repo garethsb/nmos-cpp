@@ -795,6 +795,29 @@ namespace nmos
         return{ session_name, sdp::media_types::video, rtpmap, fmtp, {}, {}, {}, {}, media_stream_ids, ts_refclk };
     }
 
+    // Construct SDP parameters for "video/H265", with sensible defaults for unspecified fields
+    sdp_parameters make_video_H265_sdp_parameters(const utility::string_t& session_name, const video_h265_parameters& params, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids, const std::vector<sdp_parameters::ts_refclk_t>& ts_refclk)
+    {
+        // a=rtpmap:<payload type> <encoding name>/<clock rate>[/<encoding parameters>]
+        sdp_parameters::rtpmap_t rtpmap = { payload_type, U("H265"), 90000 };
+
+
+
+        // a=fmtp:<format> <format specific parameters>
+        // for simplicity, following the order of parameters given in VSF TR-05:2017
+        // See https://tools.ietf.org/html/rfc4566#section-6
+        sdp_parameters::fmtp_t fmtp = {
+                { sdp::fields::profile_id, utility::ostringstreamed(params.profile_id) },
+                { sdp::fields::level_id, utility::ostringstreamed(params.level_id) },
+                { sdp::fields::interop_constraints, utility::ostringstreamed(params.interop_constraints) },
+                { sdp::fields::sprop_vps, params.sprop_vps },
+                { sdp::fields::sprop_sps, params.sprop_sps },
+                { sdp::fields::sprop_pps, params.sprop_pps }
+        };
+
+        return{ session_name, sdp::media_types::video, rtpmap, fmtp, {}, {}, {}, {}, media_stream_ids, ts_refclk };
+    }
+
     // Construct SDP parameters for "video/SMPTE2022-6", with sensible defaults for unspecified fields
     sdp_parameters make_video_SMPTE2022_6_sdp_parameters(const utility::string_t& session_name, const video_SMPTE2022_6_parameters& params, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids, const std::vector<sdp_parameters::ts_refclk_t>& ts_refclk)
     {

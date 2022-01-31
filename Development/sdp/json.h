@@ -462,6 +462,14 @@ namespace sdp
         const web::json::field<uint32_t> packetization_mode{U("packetization-mode")};
         const web::json::field_as_string sprop_parameter_sets{U("sprop-parameter-sets")};
 
+        //H265 payload mapping
+        const web::json::field<uint32_t> profile_id{U("profile-id")};
+        const web::json::field<uint32_t> level_id{U("level-id")};
+        const web::json::field<uint32_t> interop_constraints{U("interop-constraints")};
+        const web::json::field_as_string sprop_vps{U("sprop-vps")};
+        const web::json::field_as_string sprop_sps{U("sprop-sps")};
+        const web::json::field_as_string sprop_pps{U("sprop-pps")};
+
     }
 }
 
