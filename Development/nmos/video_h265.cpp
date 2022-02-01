@@ -1,26 +1,23 @@
 #include "nmos/video_h265.h"
+#include "json_fields.h"
 
 namespace nmos
 {
 
 
-//    // Construct additional "video/H264" parameters from the IS-04 resources
-//    video_H264_parameters make_video_H264_parameters(const web::json::value& node, const web::json::value& source, const web::json::value& flow, const web::json::value& sender, const utility::string_t& sprop_parameter_sets)
-//    {
-//        video_H264_parameters params;
-//
-//        // "If no profile-level-id is present, the Baseline profile,
-//        // without additional constraints at Level 1, MUST be inferred."
-//        // but better to let the caller distinguish that it's been defaulted?
-//        // See https://tools.ietf.org/html/rfc6184#section-8.1
-//        params.profile_level_id = nmos::fields::profile_level_id(flow);
-//
-//        params.packetization_mode = make_sdp_packetization_mode(packetization_mode{ nmos::fields::packetization_mode(sender) });
-//
-//        params.sprop_parameter_sets = sprop_parameter_sets;
-//
-//        return params;
-//    }
+    // Construct additional "video/H265" parameters from the IS-04 resources
+    video_h265_parameters make_video_h265_parameters(const web::json::value& node, const web::json::value& source, const web::json::value& flow, const web::json::value& sender, const utility::string_t& sprop_parameter_sets)
+    {
+        video_h265_parameters params;
+
+        params.profile_id = nmos::fields::profile_id(flow);
+
+        params.level_id = nmos::fields::level_id(flow);
+
+        params.interop_constraints = nmos::fields::interop_constraints(flow);
+
+        return params;
+    }
 
     // Construct SDP parameters for "video/H265", with sensible defaults for unspecified fields
     sdp_parameters make_video_H265_sdp_parameters(const utility::string_t& session_name, const video_h265_parameters& params, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids, const std::vector<sdp_parameters::ts_refclk_t>& ts_refclk)
