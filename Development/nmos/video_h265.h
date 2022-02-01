@@ -51,11 +51,11 @@ namespace nmos
 
 
     // Construct additional "video/H265" parameters from the IS-04 resources
-    video_h265_parameters make_video_H265_parameters(const web::json::value& node, const web::json::value& source, const web::json::value& flow, const web::json::value& sender, const utility::string_t& sprop_parameter_sets);
+    video_h265_parameters make_video_h265_parameters(const web::json::value& node, const web::json::value& source, const web::json::value& flow, const web::json::value& sender, const utility::string_t& sprop_parameter_sets);
     // Construct SDP parameters for "video/H265"
     sdp_parameters make_video_h265_sdp_parameters(const utility::string_t& session_name, const video_h265_parameters& params, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids = {}, const std::vector<sdp_parameters::ts_refclk_t>& ts_refclk = {});
     // Get additional "video/H265" parameters from the SDP parameters
-    video_h265_parameters get_video_H265_parameters(const sdp_parameters& sdp_params);
+    video_h265_parameters get_video_h265_parameters(const sdp_parameters& sdp_params);
 
     // Construct SDP parameters for "video/H265"
     inline sdp_parameters make_sdp_parameters(const utility::string_t& session_name, const video_h265_parameters& params, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids = {}, const std::vector<sdp_parameters::ts_refclk_t>& ts_refclk = {})
