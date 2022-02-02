@@ -38,6 +38,18 @@ namespace nmos
         const web::json::field_as_integer tier_flag{ U("tier_flag") };
     }
 
+    namespace caps
+    {
+        // See [TBC in NMOS Parameter Registers]
+        namespace format
+        {
+            const web::json::field_as_value_or profile_id{ U("urn:x-nmos:cap:format:profile_id"), {} }; // number
+            const web::json::field_as_value_or profile_space{ U("urn:x-nmos:cap:format:profile_space"), {} }; // number
+            const web::json::field_as_value_or level_id{ U("urn:x-nmos:cap:format:level_id"), {} }; // number
+            const web::json::field_as_value_or tier_flag{ U("urn:x-nmos:cap:format:tier_flag"), {} }; // number
+        }
+    }
+
     // Additional "video/H265" parameters
     // See https://www.iana.org/assignments/media-types/video/H265
     // and https://tools.ietf.org/html/rfc7798
@@ -79,6 +91,9 @@ namespace nmos
     {
         return make_video_H265_sdp_parameters(session_name, params, payload_type, media_stream_ids, ts_refclk);
     }
+
+    // Validate SDP parameters for "video/H265" against IS-04 receiver capabilities
+    void validate_video_H265_sdp_parameters(const web::json::value& receiver, const nmos::sdp_parameters& sdp_params);
 }
 
 #endif

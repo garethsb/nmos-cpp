@@ -1,4 +1,9 @@
 #include "nmos/video_h265.h"
+
+#include <iomanip>
+#include <map>
+#include "nmos/capabilities.h"
+#include "nmos/format.h"
 #include "nmos/json_fields.h"
 
 namespace nmos
@@ -16,6 +21,24 @@ namespace nmos
         return params;
     }
 
+    namespace details
+    {
+        utility::string_t make_sdp_interop_constraints(uint64_t interop_constraints)
+        {
+            utility::ostringstream_t ss;
+            ss << std::hex << std::uppercase << std::setw(12) << std::setfill(U('0')) << interop_constraints;
+            return ss.str();
+        }
+
+        uint64_t parse_interop_constraints(const utility::string_t& interop_constraints)
+        {
+            utility::istringstream_t ss(interop_constraints);
+            uint64_t result = 0;
+            ss >> std::hex >> result;
+            return result;
+        }
+    }
+
     // Construct SDP parameters for "video/H265", with sensible defaults for unspecified fields
     sdp_parameters make_video_H265_sdp_parameters(const utility::string_t& session_name, const video_H265_parameters& params, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids, const std::vector<sdp_parameters::ts_refclk_t>& ts_refclk)
     {
@@ -26,7 +49,7 @@ namespace nmos
         // for simplicity, following the order of parameters given in VSF TR-05:2017
         // See https://tools.ietf.org/html/rfc4566#section-6
         sdp_parameters::fmtp_t fmtp = {
-            { sdp::fields::profile_id, utility::ostringstreamed(params.profile_id) },
+            { sdp::fields::profile_id, details::make_sdp_interop_constraints(params.profile_id) },
             { sdp::fields::profile_space, utility::ostringstreamed(params.profile_space) },
             { sdp::fields::level_id, utility::ostringstreamed(params.level_id) },
             { sdp::fields::tier_flag, utility::ostringstreamed(params.tier_flag) },
@@ -37,22 +60,6 @@ namespace nmos
         };
 
         return{ session_name, sdp::media_types::video, rtpmap, fmtp, {}, {}, {}, {}, media_stream_ids, ts_refclk };
-    }
-
-
-    namespace details
-    {
-        // ought to be declared in nmos/sdp_utils.h
-        std::runtime_error sdp_processing_error(const std::string& message);
-
-        // ought to be declared in nmos/sdp_utils.h (definition currently has internal linkage)
-        sdp_parameters::fmtp_t::const_iterator find_fmtp(const sdp_parameters::fmtp_t& fmtp, const utility::string_t& param_name)
-        {
-            return std::find_if(fmtp.begin(), fmtp.end(), [&](const sdp_parameters::fmtp_t::value_type& param)
-            {
-                return param.first == param_name;
-            });
-        }
     }
 
     // Get additional "video/h265" parameters from the SDP parameters
@@ -85,7 +92,7 @@ namespace nmos
         // optional
         const auto interop_constraints = details::find_fmtp(sdp_params.fmtp, sdp::fields::interop_constraints);
         if (sdp_params.fmtp.end() == interop_constraints) throw details::sdp_processing_error("missing format parameter: interop-constraints");
-        params.interop_constraints = utility::istringstreamed<uint32_t>( interop_constraints->second );
+        params.interop_constraints = details::parse_interop_constraints( interop_constraints->second );
 
         // optional
         const auto sprop_vps = details::find_fmtp(sdp_params.fmtp, sdp::fields::sprop_vps);
@@ -103,5 +110,52 @@ namespace nmos
         params.sprop_pps = sprop_pps->second;
 
         return params;
+    }
+
+    namespace details
+    {
+        // NMOS Parameter Registers - Capabilities register
+        // See https://specs.amwa.tv/nmos-parameter-registers/branches/main/capabilities/
+#define CAPS_ARGS const sdp_parameters& sdp, const video_H265_parameters& format, const web::json::value& con
+        static const std::map<utility::string_t, std::function<bool(CAPS_ARGS)>> format_constraints
+                {
+                        { nmos::caps::format::media_type, [](CAPS_ARGS) { return nmos::match_string_constraint(sdp.media_type.name, con); } },
+                        // hmm, there are lots of other format parameter constraints that could be validated against the sprop_parameter_sets
+                        { nmos::caps::format::profile_id, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.profile_id, con); } },
+                        { nmos::caps::format::profile_space, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.profile_space, con); } },
+                        { nmos::caps::format::level_id, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.level_id, con); } },
+                        { nmos::caps::format::tier_flag, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.tier_flag, con); } },
+
+                };
+#undef CAPS_ARGS
+    }
+
+    // Validate SDP parameters for "video/H265" against IS-04 receiver capabilities
+    // cf. nmos::validate_sdp_parameters
+    void validate_video_H265_sdp_parameters(const web::json::value& receiver, const nmos::sdp_parameters& sdp_params)
+    {
+        // this function can only be used to validate SDP data for "video/H265"; logic error otherwise
+        const auto media_type = get_media_type(sdp_params);
+        if (nmos::media_types::video_H265 != media_type) throw std::invalid_argument("unexpected media type/encoding name");
+
+        // from the receiver's point of view, "video/H265" can only be expected if it's a video receiver; runtime error otherwise
+        if (nmos::format{ nmos::fields::format(receiver) } != nmos::formats::video) throw details::sdp_processing_error("unexpected media type/encoding name");
+
+        const auto& caps = nmos::fields::caps(receiver);
+        const auto& media_types_or_null = nmos::fields::media_types(caps);
+        if (!media_types_or_null.is_null())
+        {
+            const auto& media_types = media_types_or_null.as_array();
+            const auto found = std::find(media_types.begin(), media_types.end(), web::json::value::string(media_type.name));
+            if (media_types.end() == found) throw details::sdp_processing_error("unsupported encoding name");
+        }
+        const auto& constraint_sets_or_null = nmos::fields::constraint_sets(caps);
+        if (!constraint_sets_or_null.is_null())
+        {
+            const auto format_params = get_video_H265_parameters(sdp_params);
+            const auto& constraint_sets = constraint_sets_or_null.as_array();
+            const auto found = std::find_if(constraint_sets.begin(), constraint_sets.end(), [&](const web::json::value& constraint_set) { return details::match_sdp_parameters_constraint_set(details::format_constraints, sdp_params, format_params, constraint_set); });
+            if (constraint_sets.end() == found) throw details::sdp_processing_error("unsupported transport or format-specific parameters");
+        }
     }
 }
