@@ -43,10 +43,14 @@ namespace nmos
 
         video_h265_parameters() : profile_id(), level_id(), interop_constraints() {}
 
-        video_h265_parameters(uint32_t profile_id, uint32_t level_id, uint32_t interop_constraints, utility::string_t sprop_vps,
-                              utility::string_t sprop_sps, utility::string_t sprop_pps)
-                : profile_id(profile_id), level_id(level_id), interop_constraints(interop_constraints), sprop_vps(sprop_vps),
-                  sprop_sps(sprop_sps), sprop_pps(sprop_pps) {}
+        video_h265_parameters(uint32_t profile_id, uint32_t level_id, uint32_t interop_constraints, utility::string_t sprop_vps, utility::string_t sprop_sps, utility::string_t sprop_pps)
+            : profile_id(profile_id)
+            , level_id(level_id)
+            , interop_constraints(interop_constraints)
+            , sprop_vps(sprop_vps)
+            , sprop_sps(sprop_sps)
+            , sprop_pps(sprop_pps)
+        {}
     };
 
 
