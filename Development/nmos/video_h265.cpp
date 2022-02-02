@@ -3,7 +3,6 @@
 
 namespace nmos
 {
-
     // Construct additional "video/H265" parameters from the IS-04 resources
     video_H265_parameters make_video_H265_parameters(const web::json::value& node, const web::json::value& source, const web::json::value& flow, const web::json::value& sender, const utility::string_t& sprop_parameter_sets)
     {
@@ -67,27 +66,27 @@ namespace nmos
 
         // optional
         const auto level_id = details::find_fmtp(sdp_params.fmtp, sdp::fields::level_id);
-        if (sdp_params.fmtp.end() == level_id) throw details::sdp_processing_error("missing format parameter: level_id");
+        if (sdp_params.fmtp.end() == level_id) throw details::sdp_processing_error("missing format parameter: level-id");
         params.level_id = utility::istringstreamed<uint32_t>( level_id->second );
 
-        //optional
+        // optional
         const auto interop_constraints = details::find_fmtp(sdp_params.fmtp, sdp::fields::interop_constraints);
-        if (sdp_params.fmtp.end() == interop_constraints) throw details::sdp_processing_error("missing format parameter: interop_constraints");
+        if (sdp_params.fmtp.end() == interop_constraints) throw details::sdp_processing_error("missing format parameter: interop-constraints");
         params.interop_constraints = utility::istringstreamed<uint32_t>( interop_constraints->second );
 
-        //optional
+        // optional
         const auto sprop_vps = details::find_fmtp(sdp_params.fmtp, sdp::fields::sprop_vps);
-        if (sdp_params.fmtp.end() == sprop_vps) throw details::sdp_processing_error("missing format parameter: sprop_vps");
+        if (sdp_params.fmtp.end() == sprop_vps) throw details::sdp_processing_error("missing format parameter: sprop-vps");
         params.sprop_vps = sprop_vps->second;
 
-        //optional
+        // optional
         const auto sprop_sps = details::find_fmtp(sdp_params.fmtp, sdp::fields::sprop_sps);
-        if (sdp_params.fmtp.end() == sprop_sps) throw details::sdp_processing_error("missing format parameter: sprop_sps");
+        if (sdp_params.fmtp.end() == sprop_sps) throw details::sdp_processing_error("missing format parameter: sprop-sps");
         params.sprop_sps = sprop_sps->second;
 
-        //optional
+        // optional
         const auto sprop_pps = details::find_fmtp(sdp_params.fmtp, sdp::fields::sprop_pps);
-        if (sdp_params.fmtp.end() == sprop_pps) throw details::sdp_processing_error("missing format parameter: sprop_pps");
+        if (sdp_params.fmtp.end() == sprop_pps) throw details::sdp_processing_error("missing format parameter: sprop-pps");
         params.sprop_pps = sprop_pps->second;
 
         return params;

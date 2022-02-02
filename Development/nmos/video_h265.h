@@ -10,12 +10,12 @@ namespace sdp
     {
         // See https://www.iana.org/assignments/media-types/video/H265
         // and https://tools.ietf.org/html/rfc7798
-        const web::json::field<uint32_t> profile_id{U("profile-id")};
-        const web::json::field<uint32_t> level_id{U("level-id")};
-        const web::json::field<uint32_t> interop_constraints{U("interop-constraints")};
-        const web::json::field_as_string sprop_vps{U("sprop-vps")};
-        const web::json::field_as_string sprop_sps{U("sprop-sps")};
-        const web::json::field_as_string sprop_pps{U("sprop-pps")};
+        const web::json::field<uint32_t> profile_id{ U("profile-id") };
+        const web::json::field<uint32_t> level_id{ U("level-id") };
+        const web::json::field<uint32_t> interop_constraints{ U("interop-constraints") };
+        const web::json::field_as_string sprop_vps{ U("sprop-vps") };
+        const web::json::field_as_string sprop_sps{ U("sprop-sps") };
+        const web::json::field_as_string sprop_pps{ U("sprop-pps") };
     }
 }
 
@@ -32,7 +32,6 @@ namespace nmos
     {
         const web::json::field_as_integer profile_id{ U("profile_id") };
         const web::json::field_as_integer level_id{ U("level_id") };
-        const web::json::field_as_integer interop_constraints{ U("interop_constraints") };
     }
 
     // Additional "video/H265" parameters
@@ -43,7 +42,7 @@ namespace nmos
         // fmtp indicates format
         uint32_t profile_id;
         uint32_t level_id;
-        uint32_t interop_constraints;
+        uint64_t interop_constraints;
         utility::string_t sprop_vps;
         utility::string_t sprop_sps;
         utility::string_t sprop_pps;
