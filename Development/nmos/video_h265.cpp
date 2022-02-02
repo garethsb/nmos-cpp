@@ -1,5 +1,5 @@
 #include "nmos/video_h265.h"
-#include "json_fields.h"
+#include "nmos/json_fields.h"
 
 namespace nmos
 {
