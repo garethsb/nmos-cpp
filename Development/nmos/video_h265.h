@@ -8,8 +8,8 @@ namespace sdp
 {
     namespace fields
     {
-        // See https://datatracker.ietf.org/doc/html/rfc7798#page-64
-        //H265 payload mapping
+        // See https://www.iana.org/assignments/media-types/video/H265
+        // and https://tools.ietf.org/html/rfc7798
         const web::json::field<uint32_t> profile_id{U("profile-id")};
         const web::json::field<uint32_t> level_id{U("level-id")};
         const web::json::field<uint32_t> interop_constraints{U("interop-constraints")};
@@ -28,8 +28,16 @@ namespace nmos
         const media_type video_H265{ U("video/H265") };
     }
 
+    namespace fields
+    {
+        const web::json::field_as_integer profile_id{ U("profile_id") };
+        const web::json::field_as_integer level_id{ U("level_id") };
+        const web::json::field_as_integer interop_constraints{ U("interop_constraints") };
+    }
+
     // Additional "video/H265" parameters
-    // See https://datatracker.ietf.org/doc/html/rfc7798#section-4.4
+    // See https://www.iana.org/assignments/media-types/video/H265
+    // and https://tools.ietf.org/html/rfc7798
     struct video_H265_parameters
     {
         // fmtp indicates format

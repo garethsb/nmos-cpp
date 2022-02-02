@@ -3,12 +3,6 @@
 
 namespace nmos
 {
-    namespace fields
-    {
-        const web::json::field_as_integer profile_id{ U("profile_id") };
-        const web::json::field_as_integer level_id{ U("level_id") };
-        const web::json::field_as_integer interop_constraints{ U("interop_constraints") };
-    }
 
     // Construct additional "video/H265" parameters from the IS-04 resources
     video_H265_parameters make_video_H265_parameters(const web::json::value& node, const web::json::value& source, const web::json::value& flow, const web::json::value& sender, const utility::string_t& sprop_parameter_sets)
