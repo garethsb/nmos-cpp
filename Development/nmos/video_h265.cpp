@@ -119,13 +119,11 @@ namespace nmos
 #define CAPS_ARGS const sdp_parameters& sdp, const video_H265_parameters& format, const web::json::value& con
         static const std::map<utility::string_t, std::function<bool(CAPS_ARGS)>> format_constraints
                 {
-                        { nmos::caps::format::media_type, [](CAPS_ARGS) { return nmos::match_string_constraint(sdp.media_type.name, con); } },
-                        // hmm, there are lots of other format parameter constraints that could be validated against the sprop_parameter_sets
-                        { nmos::caps::format::profile_id, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.profile_id, con); } },
-                        { nmos::caps::format::profile_space, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.profile_space, con); } },
-                        { nmos::caps::format::level_id, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.level_id, con); } },
-                        { nmos::caps::format::tier_flag, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.tier_flag, con); } },
-
+                    { nmos::caps::format::media_type, [](CAPS_ARGS) { return nmos::match_string_constraint(sdp.media_type.name, con); } },
+                    { nmos::caps::format::profile_id, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.profile_id, con); } },
+                    { nmos::caps::format::profile_space, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.profile_space, con); } },
+                    { nmos::caps::format::level_id, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.level_id, con); } },
+                    { nmos::caps::format::tier_flag, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.tier_flag, con); } },
                 };
 #undef CAPS_ARGS
     }
