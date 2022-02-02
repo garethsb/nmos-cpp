@@ -4,7 +4,6 @@
 namespace nmos
 {
 
-
     // Construct additional "video/H265" parameters from the IS-04 resources
     video_h265_parameters make_video_h265_parameters(const web::json::value& node, const web::json::value& source, const web::json::value& flow, const web::json::value& sender, const utility::string_t& sprop_parameter_sets)
     {
@@ -13,8 +12,6 @@ namespace nmos
         params.profile_id = nmos::fields::profile_id(flow);
 
         params.level_id = nmos::fields::level_id(flow);
-
-        params.interop_constraints = nmos::fields::interop_constraints(flow);
 
         return params;
     }
@@ -25,18 +22,16 @@ namespace nmos
         // a=rtpmap:<payload type> <encoding name>/<clock rate>[/<encoding parameters>]
         sdp_parameters::rtpmap_t rtpmap = { payload_type, U("H265"), 90000 };
 
-
-
         // a=fmtp:<format> <format specific parameters>
         // for simplicity, following the order of parameters given in VSF TR-05:2017
         // See https://tools.ietf.org/html/rfc4566#section-6
         sdp_parameters::fmtp_t fmtp = {
-                { sdp::fields::profile_id, utility::ostringstreamed(params.profile_id) },
-                { sdp::fields::level_id, utility::ostringstreamed(params.level_id) },
-                { sdp::fields::interop_constraints, utility::ostringstreamed(params.interop_constraints) },
-                { sdp::fields::sprop_vps, params.sprop_vps },
-                { sdp::fields::sprop_sps, params.sprop_sps },
-                { sdp::fields::sprop_pps, params.sprop_pps }
+            { sdp::fields::profile_id, utility::ostringstreamed(params.profile_id) },
+            { sdp::fields::level_id, utility::ostringstreamed(params.level_id) },
+            { sdp::fields::interop_constraints, utility::ostringstreamed(params.interop_constraints) },
+            { sdp::fields::sprop_vps, params.sprop_vps },
+            { sdp::fields::sprop_sps, params.sprop_sps },
+            { sdp::fields::sprop_pps, params.sprop_pps }
         };
 
         return{ session_name, sdp::media_types::video, rtpmap, fmtp, {}, {}, {}, {}, media_stream_ids, ts_refclk };
@@ -63,7 +58,7 @@ namespace nmos
     {
         video_h265_parameters params;
 
-        if (sdp_params.fmtp.empty()) throw details::sdp_processing_error("missing attribute: fmtp");
+        if (sdp_params.fmtp.empty()) return params;
 
         // optional
         const auto profile_id = details::find_fmtp(sdp_params.fmtp, sdp::fields::profile_id);
