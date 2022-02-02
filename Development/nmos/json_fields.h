@@ -83,11 +83,6 @@ namespace nmos
         const web::json::field_as_integer width{ U("width") };
         const web::json::field_as_integer height{ U("height") };
         const web::json::field_as_integer bit_depth{ U("bit_depth") }; // also used in flow_audio_raw
-        //flow_video_h265
-        const web::json::field_as_integer profile_id{ U("profile_id") };
-        const web::json::field_as_integer level_id{ U("level_id") };
-        const web::json::field_as_integer interop_constraints{ U("interop_constraints") };
-
         // flow_audio
         const web::json::field_as_value sample_rate{ U("sample_rate") };
         // flow_sdianc_data

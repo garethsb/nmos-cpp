@@ -3,11 +3,17 @@
 
 namespace nmos
 {
+    namespace fields
+    {
+        const web::json::field_as_integer profile_id{ U("profile_id") };
+        const web::json::field_as_integer level_id{ U("level_id") };
+        const web::json::field_as_integer interop_constraints{ U("interop_constraints") };
+    }
 
     // Construct additional "video/H265" parameters from the IS-04 resources
-    video_h265_parameters make_video_h265_parameters(const web::json::value& node, const web::json::value& source, const web::json::value& flow, const web::json::value& sender, const utility::string_t& sprop_parameter_sets)
+    video_H265_parameters make_video_H265_parameters(const web::json::value& node, const web::json::value& source, const web::json::value& flow, const web::json::value& sender, const utility::string_t& sprop_parameter_sets)
     {
-        video_h265_parameters params;
+        video_H265_parameters params;
 
         params.profile_id = nmos::fields::profile_id(flow);
 
@@ -17,7 +23,7 @@ namespace nmos
     }
 
     // Construct SDP parameters for "video/H265", with sensible defaults for unspecified fields
-    sdp_parameters make_video_H265_sdp_parameters(const utility::string_t& session_name, const video_h265_parameters& params, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids, const std::vector<sdp_parameters::ts_refclk_t>& ts_refclk)
+    sdp_parameters make_video_H265_sdp_parameters(const utility::string_t& session_name, const video_H265_parameters& params, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids, const std::vector<sdp_parameters::ts_refclk_t>& ts_refclk)
     {
         // a=rtpmap:<payload type> <encoding name>/<clock rate>[/<encoding parameters>]
         sdp_parameters::rtpmap_t rtpmap = { payload_type, U("H265"), 90000 };
@@ -54,9 +60,9 @@ namespace nmos
     }
 
     // Get additional "video/h265" parameters from the SDP parameters
-    video_h265_parameters get_video_h265_parameters(const sdp_parameters& sdp_params)
+    video_H265_parameters get_video_H265_parameters(const sdp_parameters& sdp_params)
     {
-        video_h265_parameters params;
+        video_H265_parameters params;
 
         if (sdp_params.fmtp.empty()) return params;
 
