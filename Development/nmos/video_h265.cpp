@@ -9,8 +9,9 @@ namespace nmos
         video_H265_parameters params;
 
         params.profile_id = nmos::fields::profile_id(flow);
-
+        params.profile_space = nmos::fields::profile_space(flow);
         params.level_id = nmos::fields::level_id(flow);
+        params.tier_flag = nmos::fields::tier_flag(flow);
 
         return params;
     }
@@ -26,7 +27,9 @@ namespace nmos
         // See https://tools.ietf.org/html/rfc4566#section-6
         sdp_parameters::fmtp_t fmtp = {
             { sdp::fields::profile_id, utility::ostringstreamed(params.profile_id) },
+            { sdp::fields::profile_space, utility::ostringstreamed(params.profile_space) },
             { sdp::fields::level_id, utility::ostringstreamed(params.level_id) },
+            { sdp::fields::tier_flag, utility::ostringstreamed(params.tier_flag) },
             { sdp::fields::interop_constraints, utility::ostringstreamed(params.interop_constraints) },
             { sdp::fields::sprop_vps, params.sprop_vps },
             { sdp::fields::sprop_sps, params.sprop_sps },
@@ -65,9 +68,19 @@ namespace nmos
         params.profile_id = utility::istringstreamed<uint32_t>( profile_id->second );
 
         // optional
+        const auto profile_space = details::find_fmtp(sdp_params.fmtp, sdp::fields::profile_space);
+        if(sdp_params.fmtp.end() != profile_space ) throw details::sdp_processing_error("missing format parameter: profile-space");
+        params.profile_space = utility::istringstreamed<uint32_t>( profile_space->second );
+
+        // optional
         const auto level_id = details::find_fmtp(sdp_params.fmtp, sdp::fields::level_id);
         if (sdp_params.fmtp.end() == level_id) throw details::sdp_processing_error("missing format parameter: level-id");
         params.level_id = utility::istringstreamed<uint32_t>( level_id->second );
+
+        // optional
+        const auto tier_flag = details::find_fmtp(sdp_params.fmtp, sdp::fields::tier_flag);
+        if (sdp_params.fmtp.end() == tier_flag) throw details::sdp_processing_error("missing format parameter: tier-flag");
+        params.tier_flag = utility::istringstreamed<uint32_t>( tier_flag->second );
 
         // optional
         const auto interop_constraints = details::find_fmtp(sdp_params.fmtp, sdp::fields::interop_constraints);

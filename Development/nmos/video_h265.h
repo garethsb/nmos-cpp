@@ -11,8 +11,10 @@ namespace sdp
         // See https://www.iana.org/assignments/media-types/video/H265
         // and https://tools.ietf.org/html/rfc7798
         const web::json::field<uint32_t> profile_id{ U("profile-id") };
+        const web::json::field<uint32_t> profile_space{ U("profile-space") };
         const web::json::field<uint32_t> level_id{ U("level-id") };
-        const web::json::field<uint32_t> interop_constraints{ U("interop-constraints") };
+        const web::json::field<uint32_t> tier_flag{ U("tier-flag") };
+        const web::json::field<uint64_t> interop_constraints{ U("interop-constraints") };
         const web::json::field_as_string sprop_vps{ U("sprop-vps") };
         const web::json::field_as_string sprop_sps{ U("sprop-sps") };
         const web::json::field_as_string sprop_pps{ U("sprop-pps") };
@@ -31,7 +33,9 @@ namespace nmos
     namespace fields
     {
         const web::json::field_as_integer profile_id{ U("profile_id") };
+        const web::json::field_as_integer profile_space{ U("profile_space") };
         const web::json::field_as_integer level_id{ U("level_id") };
+        const web::json::field_as_integer tier_flag{ U("tier_flag") };
     }
 
     // Additional "video/H265" parameters
@@ -41,17 +45,21 @@ namespace nmos
     {
         // fmtp indicates format
         uint32_t profile_id;
+        uint32_t profile_space;
         uint32_t level_id;
+        uint32_t tier_flag;
         uint64_t interop_constraints;
         utility::string_t sprop_vps;
         utility::string_t sprop_sps;
         utility::string_t sprop_pps;
 
-        video_H265_parameters() : profile_id(), level_id(), interop_constraints() {}
+        video_H265_parameters() : profile_id(), profile_space(), level_id(), tier_flag(), interop_constraints() {}
 
-        video_H265_parameters(uint32_t profile_id, uint32_t level_id, uint32_t interop_constraints, utility::string_t sprop_vps, utility::string_t sprop_sps, utility::string_t sprop_pps)
+        video_H265_parameters(uint32_t profile_id, uint32_t profile_space, uint32_t level_id, uint32_t tier_flag, uint64_t interop_constraints, utility::string_t sprop_vps, utility::string_t sprop_sps, utility::string_t sprop_pps)
             : profile_id(profile_id)
+            , profile_space(profile_space)
             , level_id(level_id)
+            , tier_flag(tier_flag)
             , interop_constraints(interop_constraints)
             , sprop_vps(sprop_vps)
             , sprop_sps(sprop_sps)
