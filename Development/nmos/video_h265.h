@@ -49,7 +49,6 @@ namespace nmos
                   sprop_sps(sprop_sps), sprop_pps(sprop_pps) {}
     };
 
-
     // Construct additional "video/H265" parameters from the IS-04 resources
     video_h265_parameters make_video_h265_parameters(const web::json::value& node, const web::json::value& source, const web::json::value& flow, const web::json::value& sender, const utility::string_t& sprop_parameter_sets);
     // Construct SDP parameters for "video/H265"
