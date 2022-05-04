@@ -22,7 +22,7 @@ namespace sdp
     namespace fields
     {
         // See https://www.iana.org/assignments/media-types/video/H264
-        // and https://tools.ietf.org/html/rfc6184#section-6
+        // and https://tools.ietf.org/html/rfc6184#section-8
         const web::json::field_as_string_or profile_level_id{ U("profile-level-id"), {} }; // hex
         const web::json::field_with_default<uint32_t> packetization_mode{ U("packetization-mode"), (uint32_t)single_nal_unit_mode };
         const web::json::field_as_string_or sprop_parameter_sets{ U("sprop-parameter-sets"), {} };
