@@ -114,17 +114,19 @@ namespace nmos
 
     namespace details
     {
+        const video_H265_parameters* get_h265(const format_parameters* format) { return get<video_H265_parameters>(format); }
+
         // NMOS Parameter Registers - Capabilities register
         // See https://specs.amwa.tv/nmos-parameter-registers/branches/main/capabilities/
-#define CAPS_ARGS const sdp_parameters& sdp, const video_H265_parameters& format, const web::json::value& con
-        static const std::map<utility::string_t, std::function<bool(CAPS_ARGS)>> format_constraints
-                {
-                    { nmos::caps::format::media_type, [](CAPS_ARGS) { return nmos::match_string_constraint(sdp.media_type.name, con); } },
-                    { nmos::caps::format::profile_id, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.profile_id, con); } },
-                    { nmos::caps::format::profile_space, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.profile_space, con); } },
-                    { nmos::caps::format::level_id, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.level_id, con); } },
-                    { nmos::caps::format::tier_flag, [](CAPS_ARGS) { return nmos::match_integer_constraint(format.tier_flag, con); } },
-                };
+#define CAPS_ARGS const sdp_parameters& sdp, const format_parameters& format, const web::json::value& con
+        static const std::map<utility::string_t, std::function<bool(CAPS_ARGS)>> h265_constraints
+        {
+            { nmos::caps::format::media_type, [](CAPS_ARGS) { return nmos::match_string_constraint(get_media_type(sdp).name, con); } },
+            { nmos::caps::format::profile_id, [](CAPS_ARGS) { auto h265 = get_h265(&format); return h265 && nmos::match_integer_constraint(h265->profile_id, con); } },
+            { nmos::caps::format::profile_space, [](CAPS_ARGS) { auto h265 = get_h265(&format); return h265 && nmos::match_integer_constraint(h265->profile_space, con); } },
+            { nmos::caps::format::level_id, [](CAPS_ARGS) { auto h265 = get_h265(&format); return h265 && nmos::match_integer_constraint(h265->level_id, con); } },
+            { nmos::caps::format::tier_flag, [](CAPS_ARGS) { auto h265 = get_h265(&format); return h265 && nmos::match_integer_constraint(h265->tier_flag, con); } }
+        };
 #undef CAPS_ARGS
     }
 
@@ -136,24 +138,6 @@ namespace nmos
         const auto media_type = get_media_type(sdp_params);
         if (nmos::media_types::video_H265 != media_type) throw std::invalid_argument("unexpected media type/encoding name");
 
-        // from the receiver's point of view, "video/H265" can only be expected if it's a video receiver; runtime error otherwise
-        if (nmos::format{ nmos::fields::format(receiver) } != nmos::formats::video) throw details::sdp_processing_error("unexpected media type/encoding name");
-
-        const auto& caps = nmos::fields::caps(receiver);
-        const auto& media_types_or_null = nmos::fields::media_types(caps);
-        if (!media_types_or_null.is_null())
-        {
-            const auto& media_types = media_types_or_null.as_array();
-            const auto found = std::find(media_types.begin(), media_types.end(), web::json::value::string(media_type.name));
-            if (media_types.end() == found) throw details::sdp_processing_error("unsupported encoding name");
-        }
-        const auto& constraint_sets_or_null = nmos::fields::constraint_sets(caps);
-        if (!constraint_sets_or_null.is_null())
-        {
-            const auto format_params = get_video_H265_parameters(sdp_params);
-            const auto& constraint_sets = constraint_sets_or_null.as_array();
-            const auto found = std::find_if(constraint_sets.begin(), constraint_sets.end(), [&](const web::json::value& constraint_set) { return details::match_sdp_parameters_constraint_set(details::format_constraints, sdp_params, format_params, constraint_set); });
-            if (constraint_sets.end() == found) throw details::sdp_processing_error("unsupported transport or format-specific parameters");
-        }
+        nmos::details::validate_sdp_parameters(details::h265_constraints, sdp_params, nmos::formats::video, get_video_H265_parameters(sdp_params), receiver);
     }
 }
