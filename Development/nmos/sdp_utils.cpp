@@ -7,6 +7,7 @@
 #include <boost/range/irange.hpp>
 #include <boost/range/numeric.hpp>
 #include "cpprest/basic_utils.h"
+#include "nmos/capabilities.h"
 #include "nmos/clock_ref_type.h"
 #include "nmos/channels.h"
 #include "nmos/components.h"
