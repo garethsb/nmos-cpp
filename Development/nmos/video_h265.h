@@ -9,7 +9,7 @@ namespace sdp
     namespace fields
     {
         // See https://www.iana.org/assignments/media-types/video/H265
-        // and https://tools.ietf.org/html/rfc7798
+        // and https://tools.ietf.org/html/rfc7798#section-7
         const web::json::field<uint32_t> profile_id{ U("profile-id") };
         const web::json::field<uint32_t> profile_space{ U("profile-space") };
         const web::json::field<uint32_t> level_id{ U("level-id") };
@@ -26,12 +26,15 @@ namespace nmos
     namespace media_types
     {
         // H.265 Video
-        // See https://datatracker.ietf.org/doc/html/rfc7798
+        // See https://www.iana.org/assignments/media-types/video/H265
+        // and https://tools.ietf.org/html/rfc7798
         const media_type video_H265{ U("video/H265") };
     }
 
     namespace fields
     {
+        // See [TBC in NMOS Parameter Registers]
+
         const web::json::field_as_integer profile_id{ U("profile_id") };
         const web::json::field_as_integer profile_space{ U("profile_space") };
         const web::json::field_as_integer level_id{ U("level_id") };
@@ -41,6 +44,7 @@ namespace nmos
     namespace caps
     {
         // See [TBC in NMOS Parameter Registers]
+
         namespace format
         {
             const web::json::field_as_value_or profile_id{ U("urn:x-nmos:cap:format:profile_id"), {} }; // number
