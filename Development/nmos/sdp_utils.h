@@ -5,6 +5,7 @@
 #include <functional>
 #include <map>
 #include <stdexcept>
+#include "bst/any.h"
 #include "bst/optional.h"
 #include "sdp/json.h"
 #include "sdp/ntp.h"
@@ -15,6 +16,7 @@
 
 namespace nmos
 {
+    struct format;
     struct media_type;
 
     struct sdp_parameters; // defined below
@@ -478,26 +480,30 @@ namespace nmos
             });
         }
 
-        template <typename FormatParameters>
-        using format_parameter_constraint = std::function<bool(const sdp_parameters& sdp, const FormatParameters& format, const web::json::value& con)>;
+        // type-erased format-specific parameters
+        // e.g. can hold a video_raw_parameters, an audio_L_parameters, etc.
+        typedef bst::any format_parameters;
 
         template <typename FormatParameters>
-        using format_parameter_constraints = std::map<utility::string_t, format_parameter_constraint<FormatParameters>>;
-
-        template <typename FormatParameters>
-        bool match_sdp_parameters_constraint_set(const format_parameter_constraints<FormatParameters>& format_constraints, const sdp_parameters& sdp_params, const FormatParameters& format_params, const web::json::value& constraint_set)
+        inline const FormatParameters* get(const format_parameters* any)
         {
-            using web::json::value;
-
-            if (!nmos::caps::meta::enabled(constraint_set)) return false;
-
-            const auto& constraints = constraint_set.as_object();
-            return constraints.end() == std::find_if(constraints.begin(), constraints.end(), [&](const std::pair<utility::string_t, value>& constraint)
-            {
-                const auto found = format_constraints.find(constraint.first);
-                return format_constraints.end() != found && !found->second(sdp_params, format_params, constraint.second);
-            });
+            return bst::any_cast<FormatParameters>(any);
         }
+
+        // a function to check the specified SDP parameters and format-specific parameters
+        // against the specified parameter constraint value, see nmos/capabilities.h
+        typedef std::function<bool(const sdp_parameters& sdp_params, const format_parameters& format_params, const web::json::value& constraint)> sdp_parameter_constraint;
+
+        // a map from parameter constraint URNs to parameter constraint functions
+        typedef std::map<utility::string_t, sdp_parameter_constraint> sdp_parameter_constraints;
+
+        // Check the specified SDP parameters and format-specific parameters against the specified constraint set
+        // using the specified parameter constraint functions
+        bool match_sdp_parameters_constraint_set(const sdp_parameter_constraints& constraints, const sdp_parameters& sdp_params, const format_parameters& format_params, const web::json::value& constraint_set);
+
+        // Validate the specified SDP parameters and format-specific parameters against the specified receiver
+        // using the specified parameter constraint functions
+        void validate_sdp_parameters(const sdp_parameter_constraints& constraints, const sdp_parameters& sdp_params, const format& format, const format_parameters& format_params, const web::json::value& receiver);
 
         // Construct ts-refclk attributes for each leg based on the IS-04 resources
         std::vector<sdp_parameters::ts_refclk_t> make_ts_refclk(const web::json::value& node, const web::json::value& source, const web::json::value& sender, bst::optional<int> ptp_domain);
