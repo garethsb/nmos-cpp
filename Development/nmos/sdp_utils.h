@@ -9,7 +9,6 @@
 #include "bst/optional.h"
 #include "sdp/json.h"
 #include "sdp/ntp.h"
-#include "nmos/capabilities.h"
 #include "nmos/did_sdid.h"
 #include "nmos/rational.h"
 #include "nmos/vpid_code.h"
@@ -87,14 +86,14 @@ namespace nmos
 
             origin_t() : session_id(), session_version() {}
             origin_t(const utility::string_t& user_name, uint64_t session_id, uint64_t session_version)
-                    : user_name(user_name)
-                    , session_id(session_id)
-                    , session_version(session_version)
+                : user_name(user_name)
+                , session_id(session_id)
+                , session_version(session_version)
             {}
             origin_t(const utility::string_t& user_name, uint64_t session_id_version)
-                    : user_name(user_name)
-                    , session_id(session_id_version)
-                    , session_version(session_id_version)
+                : user_name(user_name)
+                , session_id(session_id_version)
+                , session_version(session_id_version)
             {}
         } origin;
 
@@ -173,10 +172,10 @@ namespace nmos
 
             rtpmap_t() : payload_type(), clock_rate(), encoding_parameters() {}
             rtpmap_t(uint64_t payload_type, const utility::string_t& encoding_name, uint64_t clock_rate, uint64_t encoding_parameters = {})
-                    : payload_type(payload_type)
-                    , encoding_name(encoding_name)
-                    , clock_rate(clock_rate)
-                    , encoding_parameters(encoding_parameters)
+                : payload_type(payload_type)
+                , encoding_name(encoding_name)
+                , clock_rate(clock_rate)
+                , encoding_parameters(encoding_parameters)
             {}
         } rtpmap;
 
@@ -191,7 +190,7 @@ namespace nmos
 
         // For now, only the default payload format is covered.
         //std::vector<std::pair<rtpmap_t, fmtp_t>> alternative_rtpmap_fmtp;
-
+        
         // Timestamp Reference Clock Source Signalling ("a=ts-refclk:")
         // See https://tools.ietf.org/html/rfc7273#section-4
         struct ts_refclk_t
@@ -224,10 +223,10 @@ namespace nmos
             }
             ts_refclk_t() {}
             ts_refclk_t(const sdp::ts_refclk_source& clock_source, const sdp::ptp_version& ptp_version, const utility::string_t& ptp_server, const utility::string_t& mac_address)
-                    : clock_source(clock_source)
-                    , ptp_version(ptp_version)
-                    , ptp_server(ptp_server)
-                    , mac_address(mac_address)
+                : clock_source(clock_source)
+                , ptp_version(ptp_version)
+                , ptp_server(ptp_server)
+                , mac_address(mac_address)
             {}
         };
         std::vector<sdp_parameters::ts_refclk_t> ts_refclk; // hm, this is one for each leg
@@ -241,8 +240,8 @@ namespace nmos
 
             mediaclk_t() {}
             mediaclk_t(const sdp::mediaclk_source& clock_source, const utility::string_t& clock_parameters = {})
-                    : clock_source(clock_source)
-                    , clock_parameters(clock_parameters)
+                : clock_source(clock_source)
+                , clock_parameters(clock_parameters)
             {}
         } mediaclk;
 
@@ -251,21 +250,21 @@ namespace nmos
 
         // construct SDP parameters with sensible defaults for unspecified fields
         sdp_parameters(const utility::string_t& session_name, const sdp::media_type& media_type, const rtpmap_t& rtpmap, const fmtp_t& fmtp = {}, uint64_t bandwidth = {}, double packet_time = {}, double max_packet_time = {}, double framerate = {}, const std::vector<utility::string_t>& media_stream_ids = {}, const std::vector<ts_refclk_t>& ts_refclk = {})
-                : origin(U("-"), sdp::ntp_now() >> 32)
-                , session_name(session_name)
-                , connection_data(32)
-                , timing()
-                , group(!media_stream_ids.empty() ? group_t{ sdp::group_semantics::duplication, media_stream_ids } : group_t{})
-                , media_type(media_type)
-                , protocol(sdp::protocols::RTP_AVP)
-                , bandwidth(0 != bandwidth ? bandwidth_t{ sdp::bandwidth_types::application_specific, bandwidth } : bandwidth_t{})
-                , packet_time(packet_time)
-                , max_packet_time(max_packet_time)
-                , rtpmap(rtpmap)
-                , framerate(framerate)
-                , fmtp(fmtp)
-                , ts_refclk(ts_refclk)
-                , mediaclk(sdp::mediaclk_sources::direct, U("0"))
+            : origin(U("-"), sdp::ntp_now() >> 32)
+            , session_name(session_name)
+            , connection_data(32)
+            , timing()
+            , group(!media_stream_ids.empty() ? group_t{ sdp::group_semantics::duplication, media_stream_ids } : group_t{})
+            , media_type(media_type)
+            , protocol(sdp::protocols::RTP_AVP)
+            , bandwidth(0 != bandwidth ? bandwidth_t{ sdp::bandwidth_types::application_specific, bandwidth } : bandwidth_t{})
+            , packet_time(packet_time)
+            , max_packet_time(max_packet_time)
+            , rtpmap(rtpmap)
+            , framerate(framerate)
+            , fmtp(fmtp)
+            , ts_refclk(ts_refclk)
+            , mediaclk(sdp::mediaclk_sources::direct, U("0"))
         {}
 
         // deprecated, provided to slightly simplify updating code to use fmtp
@@ -311,16 +310,16 @@ namespace nmos
 
         video_raw_parameters() : width(), height(), interlace(), segmented(), depth() {}
         video_raw_parameters(uint32_t width, uint32_t height, const nmos::rational& exactframerate, bool interlace, bool segmented, const sdp::sampling& sampling, uint32_t depth, const sdp::transfer_characteristic_system& tcs, const sdp::colorimetry& colorimetry, const sdp::type_parameter& tp)
-                : width(width)
-                , height(height)
-                , exactframerate(exactframerate)
-                , interlace(interlace)
-                , segmented(segmented)
-                , sampling(sampling)
-                , depth(depth)
-                , tcs(tcs)
-                , colorimetry(colorimetry)
-                , tp(tp)
+            : width(width)
+            , height(height)
+            , exactframerate(exactframerate)
+            , interlace(interlace)
+            , segmented(segmented)
+            , sampling(sampling)
+            , depth(depth)
+            , tcs(tcs)
+            , colorimetry(colorimetry)
+            , tp(tp)
         {}
     };
 
@@ -346,11 +345,11 @@ namespace nmos
 
         audio_L_parameters() : channel_count(), bit_depth(), sample_rate(), packet_time() {}
         audio_L_parameters(uint32_t channel_count, uint32_t bit_depth, uint64_t sample_rate, const utility::string_t& channel_order, double packet_time)
-                : channel_count(channel_count)
-                , bit_depth(bit_depth)
-                , sample_rate(sample_rate)
-                , channel_order(channel_order)
-                , packet_time(packet_time)
+            : channel_count(channel_count)
+            , bit_depth(bit_depth)
+            , sample_rate(sample_rate)
+            , channel_order(channel_order)
+            , packet_time(packet_time)
         {}
     };
 
@@ -366,8 +365,8 @@ namespace nmos
         nmos::vpid_code vpid_code;
 
         video_smpte291_parameters(const std::vector<nmos::did_sdid>& did_sdids = {}, nmos::vpid_code vpid_code = {})
-                : did_sdids(did_sdids)
-                , vpid_code(vpid_code)
+            : did_sdids(did_sdids)
+            , vpid_code(vpid_code)
         {}
     };
 
@@ -379,7 +378,7 @@ namespace nmos
 
         video_SMPTE2022_6_parameters() {}
         video_SMPTE2022_6_parameters(const sdp::type_parameter& tp)
-                : tp(tp)
+            : tp(tp)
         {}
     };
 
@@ -434,22 +433,22 @@ namespace nmos
 
     // deprecated, use make_video_raw_sdp_parameters or equivalent overload of make_sdp_parameters
     inline sdp_parameters::sdp_parameters(const utility::string_t& session_name, const video_t& video, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids, const std::vector<ts_refclk_t>& ts_refclk)
-            : sdp_parameters(make_sdp_parameters(session_name, video, payload_type, media_stream_ids, ts_refclk))
+        : sdp_parameters(make_sdp_parameters(session_name, video, payload_type, media_stream_ids, ts_refclk))
     {}
 
     // deprecated, use make_audio_L_sdp_parameters or equivalent overload of make_sdp_parameters
     inline sdp_parameters::sdp_parameters(const utility::string_t& session_name, const audio_t& audio, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids, const std::vector<ts_refclk_t>& ts_refclk)
-            : sdp_parameters(make_sdp_parameters(session_name, audio, payload_type, media_stream_ids, ts_refclk))
+        : sdp_parameters(make_sdp_parameters(session_name, audio, payload_type, media_stream_ids, ts_refclk))
     {}
 
     // deprecated, use make_video_smpte291_sdp_parameters or equivalent overload of make_sdp_parameters
     inline sdp_parameters::sdp_parameters(const utility::string_t& session_name, const data_t& data, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids, const std::vector<ts_refclk_t>& ts_refclk)
-            : sdp_parameters(make_sdp_parameters(session_name, data, payload_type, media_stream_ids, ts_refclk))
+        : sdp_parameters(make_sdp_parameters(session_name, data, payload_type, media_stream_ids, ts_refclk))
     {}
 
     // deprecated, use make_video_SMPTE2022_6_sdp_parameters or equivalent overload of make_sdp_parameters
     inline sdp_parameters::sdp_parameters(const utility::string_t& session_name, const mux_t& mux, uint64_t payload_type, const std::vector<utility::string_t>& media_stream_ids, const std::vector<ts_refclk_t>& ts_refclk)
-            : sdp_parameters(make_sdp_parameters(session_name, mux, payload_type, media_stream_ids, ts_refclk))
+        : sdp_parameters(make_sdp_parameters(session_name, mux, payload_type, media_stream_ids, ts_refclk))
     {}
 
     // Helper functions for implementing format-specific functions
