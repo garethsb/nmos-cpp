@@ -47,7 +47,7 @@ jobs:
           - os: ubuntu-22.04
             install_mdns: false
             use_conan: true
-            force_cpprest_asio: true
+            force_cpprest_asio: false
             dns_sd_mode: multicast
 
     steps:
