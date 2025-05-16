@@ -1152,7 +1152,7 @@ namespace slog
             using log_statement::pertinent;
             using log_statement::log;
 
-            logw(log_gate& gate, severity level, const char* file, int line, const char* function, bool pert = true, const int& count = count_unused())
+            logw(log_gate& gate, severity level, const char* file, int line, const char* function, bool pert = true, const int& count = log_statement::count_unused())
                 : log_statement(level, file, line, function, pert && gate.pertinent(level), count)
                 , uncaught_exceptions_(pertinent() ? uncaught_exceptions() : -1)
                 , gate_(gate)
