@@ -364,7 +364,7 @@ namespace nmos
         const nmos::profile& profile,
         const nmos::level& level,
         const nmos::sublevel& sublevel,
-        double bits_per_pixel,
+        uint64_t bit_rate,
         const nmos::settings& settings)
     {
         using web::json::value;
@@ -384,7 +384,6 @@ namespace nmos
         if (!profile.empty()) data[nmos::fields::profile] = value(profile.name);
         if (!level.empty()) data[nmos::fields::level] = value(level.name);
         if (!sublevel.empty()) data[nmos::fields::sublevel] = value(sublevel.name);
-        const auto bit_rate = nmos::get_video_jxsv_bit_rate(grain_rate, frame_width, frame_height, bits_per_pixel);
         if (0 != bit_rate) data[nmos::fields::bit_rate] = value(bit_rate);
 
         return resource;
