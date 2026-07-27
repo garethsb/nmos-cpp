@@ -388,19 +388,24 @@ namespace sdp
             }
         };
 
-        converter object_converter_impl(const std::vector<std::pair<utility::string_t, converter>>& field_converters, size_t required_field_count, const std::string& delimiter)
+        // Unlike each entry in field_converters, which consumes one delimiter-separated value,
+        // trailing_field_converter receives the remainder of the input (which may itself contain
+        // delimiters). Omitted when absent or empty. Pass {} for none.
+        converter object_converter(const std::vector<std::pair<utility::string_t, converter>>& field_converters, const std::pair<utility::string_t, converter>& trailing_field_converter, const std::string& delimiter = " ")
         {
             return{
                 [=](const web::json::value& v) {
                     std::string s;
-                    for (size_t index = 0; index < field_converters.size(); ++index)
+                    for (auto& field : field_converters)
                     {
-                        const auto& field = field_converters[index];
-                        if (required_field_count <= index && !field.first.empty() && !v.has_field(field.first)) continue;
-
-                        const auto formatted = field.second.format(!field.first.empty() ? v.at(field.first) : v);
-                        if (required_field_count <= index && formatted.empty()) continue;
-
+                        if (!s.empty()) s += delimiter;
+                        s += field.second.format(!field.first.empty() ? v.at(field.first) : v);
+                    }
+                    if (!trailing_field_converter.second.format) return s;
+                    if (!trailing_field_converter.first.empty() && !v.has_field(trailing_field_converter.first)) return s;
+                    const auto formatted = trailing_field_converter.second.format(!trailing_field_converter.first.empty() ? v.at(trailing_field_converter.first) : v);
+                    if (!formatted.empty())
+                    {
                         if (!s.empty()) s += delimiter;
                         s += formatted;
                     }
@@ -409,23 +414,25 @@ namespace sdp
                 [=](const std::string& s) {
                     auto v = web::json::value::object(keep_order);
                     size_t pos = 0;
-                    for (size_t index = 0; index < field_converters.size(); ++index)
+                    for (auto& field : field_converters)
                     {
-                        const auto& field = field_converters[index];
-                        if (std::string::npos == pos)
-                        {
-                            if (required_field_count <= index) break;
-                            throw sdp_parse_error("expected a value for " + utility::us2s(field.first));
-                        }
-
-                        auto each = required_field_count <= index
-                            ? substr_find(s, pos)
-                            : substr_find(s, pos, delimiter);
+                        if (std::string::npos == pos) throw sdp_parse_error("expected a value for " + utility::us2s(field.first));
+                        auto each = substr_find(s, pos, delimiter);
                         // leading or repeated delimiters are an error
                         if (each.empty()) throw sdp_parse_error("unexpected delimiter");
 
                         auto vv = field.second.parse(each);
                         if (!field.first.empty()) v[field.first] = vv;
+                        else web::json::insert(v, vv.as_object().begin(), vv.as_object().end());
+                    }
+                    if (trailing_field_converter.second.parse && std::string::npos != pos)
+                    {
+                        auto each = substr_find(s, pos);
+                        // leading or repeated delimiters are an error
+                        if (each.empty()) throw sdp_parse_error("unexpected delimiter");
+
+                        auto vv = trailing_field_converter.second.parse(each);
+                        if (!trailing_field_converter.first.empty()) v[trailing_field_converter.first] = vv;
                         else web::json::insert(v, vv.as_object().begin(), vv.as_object().end());
                     }
                     return v;
@@ -435,15 +442,7 @@ namespace sdp
 
         converter object_converter(const std::vector<std::pair<utility::string_t, converter>>& field_converters, const std::string& delimiter = " ")
         {
-            return object_converter_impl(field_converters, field_converters.size(), delimiter);
-        }
-
-        // The optional trailing field receives all remaining input, rather than one delimiter-separated value
-        converter object_converter(const std::vector<std::pair<utility::string_t, converter>>& required_field_converters, const std::pair<utility::string_t, converter>& optional_trailing_field_converter, const std::string& delimiter = " ")
-        {
-            auto field_converters = required_field_converters;
-            field_converters.push_back(optional_trailing_field_converter);
-            return object_converter_impl(field_converters, required_field_converters.size(), delimiter);
+            return object_converter(field_converters, {}, delimiter);
         }
 
         const std::string time_units{ 'd', 'h', 'm', 's' }; // days, hours, minutes, seconds
