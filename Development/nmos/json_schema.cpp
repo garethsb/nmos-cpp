@@ -77,11 +77,11 @@ namespace nmos
             return{ _XPLATSTR("https://github.com/AMWA-TV/is-05/raw/") + tag + _XPLATSTR("/APIs/schemas/") + ref };
         }
 
-        // See https://github.com/AMWA-TV/is-05/blob/v1.2-dev/APIs/schemas/
+        // See https://github.com/AMWA-TV/is-05/blob/v1.2.x/APIs/schemas/
         namespace v1_2
         {
-            using namespace nmos::is05_schemas::v1_2_dev;
-            const utility::string_t tag(_XPLATSTR("v1.2-dev"));
+            using namespace nmos::is05_schemas::v1_2_x;
+            const utility::string_t tag(_XPLATSTR("v1.2.x"));
 
             const web::uri connectionapi_sender_staged_patch_request_uri = make_schema_uri(tag, _XPLATSTR("sender-stage-schema.json"));
             const web::uri connectionapi_receiver_staged_patch_request_uri = make_schema_uri(tag, _XPLATSTR("receiver-stage-schema.json"));
@@ -345,6 +345,7 @@ namespace nmos
                 { make_schema_uri(v1_2::tag, _XPLATSTR("sender_transport_params_mqtt.json")), make_schema(v1_2::sender_transport_params_mqtt) },
                 { make_schema_uri(v1_2::tag, _XPLATSTR("sender_transport_params_mxl.json")), make_schema(v1_2::sender_transport_params_mxl) },
                 { make_schema_uri(v1_2::tag, _XPLATSTR("sender_transport_params_ext.json")), make_schema(v1_2::sender_transport_params_ext) },
+                { make_schema_uri(v1_2::tag, _XPLATSTR("mxl_uuid.json")), make_schema(v1_2::mxl_uuid) },
                 { make_schema_uri(v1_2::tag, _XPLATSTR("receiver_transport_params.json")), make_schema(v1_2::receiver_transport_params) },
                 { make_schema_uri(v1_2::tag, _XPLATSTR("receiver_transport_params_rtp.json")), make_schema(v1_2::receiver_transport_params_rtp) },
                 { make_schema_uri(v1_2::tag, _XPLATSTR("receiver_transport_params_dash.json")), make_schema(v1_2::receiver_transport_params_dash) },
